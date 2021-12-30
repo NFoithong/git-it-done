@@ -2,6 +2,7 @@ var userFormEl = document.querySelector("#user-form");
 var nameInputEl = document.querySelector("#username");
 var repoContainerEl = document.querySelector("#repos-container");
 var repoSearchTerm = document.querySelector("#repo-search-term");
+var languageButtonEl = document.querySelector("#language-buttons");
 
 var formSubmitHandler = function(event) {
     event.preventDefault();
@@ -17,6 +18,64 @@ var formSubmitHandler = function(event) {
     }
     console.log(event);
 }
+
+var buttonClickHandler = function(event) {
+    var language = event.target.getAttribute("data-language");
+    // console.log(language);
+    if (language) {
+        getFeatureRepos(language);
+
+        // clear old content
+        repoContainerEl.textContent = "";
+    }
+
+}
+
+var getFeatureRepos = function(language) {
+    var apiUrl = "https://api.github.com/search/repositories?q=" + language + "+is:featured&sort=help-wanted-issues";
+    fetch(apiUrl).then(function(response) {
+        if (response.ok) {
+            response.json().then(function(data) {
+                    displayRepos(data.item, language);
+                    // console.log(data)
+                })
+                // console.log(response);
+        } else {
+            alert("Error: Github User Not Found");
+        }
+    });
+};
+
+
+var getUserRepos = function(user) {
+    // format the github api url
+    var apiUrl = "https://api.github.com/users/" + user + "/repos";
+
+    // var response = fetch("https://api.github.com/users/octocat/repos");
+    // console.log(response);
+
+    // make a request to the url
+    fetch(apiUrl)
+        .then(function(response) {
+            // request was successful
+            if (response.ok) {
+                response.json()
+                    .then(function(data) {
+                        displayRepos(data, user);
+                        // console.log(data);
+                    });
+            } else {
+                alert("Error: Github User Not Found");
+            }
+
+            // console.log("inside", response);
+        })
+        .catch(function(erroe) {
+            // Notice this '.catch()' getting chained onto the end of the '.then()' method
+            alert("Unable to connect to Github");
+        })
+        // console.log("outside");
+};
 
 var displayRepos = function(repos, searchTerm) {
 
@@ -71,37 +130,9 @@ var displayRepos = function(repos, searchTerm) {
     console.log(searchTerm);
 };
 
-var getUserRepos = function(user) {
-    // format the github api url
-    var apiUrl = "https://api.github.com/users/" + user + "/repos";
-
-    // var response = fetch("https://api.github.com/users/octocat/repos");
-    // console.log(response);
-
-    // make a request to the url
-    fetch(apiUrl)
-        .then(function(response) {
-            // request was successful
-            if (response.ok) {
-                response.json()
-                    .then(function(data) {
-                        displayRepos(data, user);
-                        // console.log(data);
-                    });
-            } else {
-                alert("Error: Github User Not Found");
-            }
-
-            // console.log("inside", response);
-        })
-        .catch(function(erroe) {
-            // Notice this '.catch()' getting chained onto the end of the '.then()' method
-            alert("Unable to connect to Github");
-        })
-        // console.log("outside");
-};
 
 // getUserRepos("microsoft");
 // getUserRepos("facebook");
 // getUserRepos("NFoithong");
 userFormEl.addEventListener("submit", formSubmitHandler);
+languageButtonEl.addEventListener("click", buttonClickHandler);
